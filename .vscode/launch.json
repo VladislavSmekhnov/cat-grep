@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${fileDirname}/${fileBasenameNoExtension}",
       "args": [
-        "-t",
+        "-sn",
         "src/cat/test.txt"
       ],
       "cwd": "${workspaceFolder}"

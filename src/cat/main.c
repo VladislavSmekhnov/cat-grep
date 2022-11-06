@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
           // if we have n-flag firstly run:
           if (print_char != EOF) {
             if ((flags.n == 1 || flags.b == 1) && opened_file == 1) {
-              if (flags.b == 1 && futur_char != '\n') {
+              if (flags.b == 1 && print_char != '\n') {
                 printf("%6d\t", line_number);
                 line_number++;
               } else if (flags.b == 0) {
@@ -91,7 +91,12 @@ int main(int argc, char* argv[]) {
                   printf("%c", print_char);
                 }
               } else {
-                printf("%c", print_char);
+                if (flags.e == 1 && print_char == '\n')
+                  printf("$%c", print_char);
+                else if (flags.s == 1 && print_char != '\n')
+                  printf("%c", print_char);
+                else
+                  printf("%c", print_char);
               }
               // if n:
               if ((flags.n == 1 || flags.b == 1) && print_char == '\n' && futur_char != EOF) {
@@ -108,8 +113,8 @@ int main(int argc, char* argv[]) {
                 if (flags.v == 1) {
                   if (print_char >= 0 && print_char < 32 && print_char != '\n' && print_char != '\t')
                     printf("^%c", print_char + 64);
-                  else if (futur_char == '\n')
-                    printf("$");
+                  // else if (futur_char == '\n')
+                  //   printf("$");
                 } else if (futur_char == '\n') {
                   printf("$");
                 }
@@ -151,7 +156,7 @@ int argv_parser(int argc, char* argv[], opt* flags, int *count) {
         } else if (argv[tmp_count][i] == 'n') {
           flags->n = 1;
         } else if (argv[tmp_count][i] == 's') {
-          flags->s = 1;
+          flags->s  = 1;
         } else if (argv[tmp_count][i] == 't') {
           flags->t = 1;
           flags->v = 1;
