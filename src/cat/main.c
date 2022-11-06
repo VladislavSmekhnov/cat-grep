@@ -25,12 +25,10 @@ int argv_parser(int argc, char* argv[], opt* flags, int *count);
 int main(int argc, char* argv[]) {
   int state = 0;
   if (argc > 1) {
-    // printf("argv[0] = %s\nargv[1] = %s\nargv[2] = %s\n", argv[0], argv[1], argv[2]);
     opt flags;
     zero_flags(&flags);
     int count;
     if (argv_parser(argc, argv, &flags, &count) == 0) {
-      // printf("opening file: %s\n", argv[count]);
       int line_number = 1;
       while (count < argc && argv[count][0] != '\0') {
         char *filename = argv[count];
@@ -42,9 +40,14 @@ int main(int argc, char* argv[]) {
           char futur_char = '\0';
           // if we have n-flag firstly run:
           if (print_char != EOF) {
-            if (flags.n == 1 && opened_file == 1) {
-              printf("%6d\t", line_number);
-              line_number++;
+            if ((flags.n == 1 || flags.b == 1) && opened_file == 1) {
+              if (flags.b == 1 && futur_char != '\n') {
+                printf("%6d\t", line_number);
+                line_number++;
+              } else if (flags.b == 0) {
+                printf("%6d\t", line_number);
+                line_number++;
+              }
             }
             while ((futur_char = getc(fptr)) != EOF) {
               // if s:
@@ -54,29 +57,29 @@ int main(int argc, char* argv[]) {
                     futur_char = getc(fptr);
                   }
                 }
-                // if n:
-                if (flags.n == 1) {
+                // if sn:
+                if (print_char == '\n')
+                  printf("%c", print_char);
+                if (flags.n == 1 && print_char == '\n') {
                   printf("%6d\t", line_number);
                   line_number++;
                 }
-                // if e:
+                // if se:
                 if (flags.e == 1) {
                   if (flags.v == 1) {
-                    if (print_char >= 0 && print_char < 32)
+                    if (print_char >= 0 && print_char < 32 && print_char != '\n' && print_char != '\t')
                       printf("^%c", print_char + 64);
                     else if (print_char == '\n')
-                      printf("$\n");
-                    else
-                      printf("%c", print_char);
+                      printf("$");
                   } else if (print_char == '\n') {
-                    printf("$\n");
+                    printf("$");
                   }
                 }
               }
               // print:
               if (flags.t == 1) {
                 if (flags.v == 1) {
-                  if (print_char >= 0 && print_char < 32)
+                  if (print_char >= 0 && print_char < 32 && print_char != '\n' && print_char != '\t')
                     printf("^%c", print_char + 64);
                   else if (print_char == '\t')
                     printf("^I");
@@ -91,19 +94,22 @@ int main(int argc, char* argv[]) {
                 printf("%c", print_char);
               }
               // if n:
-              if (flags.n == 1 && print_char == '\n') {
-                printf("%6d\t", line_number);
-                line_number++;
+              if ((flags.n == 1 || flags.b == 1) && print_char == '\n' && futur_char != EOF) {
+                if (flags.b == 1 && futur_char != '\n') {
+                  printf("%6d\t", line_number);
+                  line_number++;
+                } else if (flags.b == 0) {
+                  printf("%6d\t", line_number);
+                  line_number++;
+                }
               }
               // if e:
               if (flags.e == 1) {
                 if (flags.v == 1) {
-                  if (print_char >= 0 && print_char < 32 && print_char != '\n')
+                  if (print_char >= 0 && print_char < 32 && print_char != '\n' && print_char != '\t')
                     printf("^%c", print_char + 64);
                   else if (futur_char == '\n')
                     printf("$");
-                  // else
-                  //   printf("%c", print_char);
                 } else if (futur_char == '\n') {
                   printf("$");
                 }
