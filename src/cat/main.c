@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-typedef struct options {
-  int b;
-  int e;
-  int v;
-  int n;
-  int s;
-  int t;
-} opt;
+#include "main.h"
 
 void zero_flags(opt *flags) {
   flags->b = 0;
@@ -20,132 +9,86 @@ void zero_flags(opt *flags) {
   flags->t = 0;
 }
 
-int argv_parser(int argc, char* argv[], opt* flags, int *count);
+int argv_parser(int argc, char *argv[], opt *flags, int *count);
+void output_file(FILE *file, opt flags);
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   int state = 0;
+
   if (argc > 1) {
     opt flags;
     zero_flags(&flags);
     int count;
     if (argv_parser(argc, argv, &flags, &count) == 0) {
-      int line_number = 1;
       while (count < argc && argv[count][0] != '\0') {
-        char *filename = argv[count];
-        int opened_file = 0;
-        FILE *fptr = fopen(filename, "r");
+        FILE *fptr = fopen(argv[count], "r");
         if (fptr != NULL) {
-          opened_file++;
-          char print_char = getc(fptr);
-          char futur_char = '\0';
-          // if we have n-flag firstly run:
-          if (print_char != EOF) {
-            if ((flags.n == 1 || flags.b == 1) && opened_file == 1) {
-              if (flags.b == 1 && print_char != '\n') {
-                printf("%6d\t", line_number);
-                line_number++;
-              } else if (flags.b == 0) {
-                printf("%6d\t", line_number);
-                line_number++;
-              }
-            }
-            while ((futur_char = getc(fptr)) != EOF) {
-              // if s:
-              if (flags.s == 1) {
-                if (print_char == '\n' && futur_char == '\n') {
-                  while (futur_char == '\n') {
-                    futur_char = getc(fptr);
-                  }
-                }
-                // if sn:
-                if (print_char == '\n')
-                  printf("%c", print_char);
-                if (flags.n == 1 && print_char == '\n') {
-                  printf("%6d\t", line_number);
-                  line_number++;
-                }
-                // if se:
-                if (flags.e == 1) {
-                  if (flags.v == 1) {
-                    if (print_char >= 0 && print_char < 32 && print_char != '\n' && print_char != '\t')
-                      printf("^%c", print_char + 64);
-                    else if (print_char == '\n')
-                      printf("$");
-                  } else if (print_char == '\n') {
-                    printf("$");
-                  }
-                }
-              }
-              // print:
-              if (flags.t == 1) {
-                if (flags.v == 1) {
-                  if (print_char >= 0 && print_char < 32 && print_char != '\n' && print_char != '\t')
-                    printf("^%c", print_char + 64);
-                  else if (print_char == '\t')
-                    printf("^I");
-                  else
-                    printf("%c", print_char);
-                } else if (print_char == '\t') {
-                  printf("^I");
-                } else {
-                  printf("%c", print_char);
-                }
-              } else {
-                if (flags.e == 1 && print_char == '\n')
-                  printf("$%c", print_char);
-                else if (flags.s == 1 && print_char != '\n')
-                  printf("%c", print_char);
-                else
-                  printf("%c", print_char);
-              }
-              // if n:
-              if ((flags.n == 1 || flags.b == 1) && print_char == '\n' && futur_char != EOF) {
-                if (flags.b == 1 && futur_char != '\n') {
-                  printf("%6d\t", line_number);
-                  line_number++;
-                } else if (flags.b == 0) {
-                  printf("%6d\t", line_number);
-                  line_number++;
-                }
-              }
-              // if e:
-              if (flags.e == 1) {
-                if (flags.v == 1) {
-                  if (print_char >= 0 && print_char < 32 && print_char != '\n' && print_char != '\t')
-                    printf("^%c", print_char + 64);
-                  // else if (futur_char == '\n')
-                  //   printf("$");
-                } else if (futur_char == '\n') {
-                  printf("$");
-                }
-              }
-
-              print_char = futur_char;
-            }
-          }
-          if (print_char != EOF)
-            printf("%c", print_char);
+          output_file(fptr, flags);
           fclose(fptr);
-          // if (argv[count + 1][0] != '\0')
-          count++;
         } else {
+          fprintf(stderr, "No shuch file or directory: %s\n", argv[count]);
           state = 1;
-          printf("No such file or directory\n");
         }
+        count++;
       }
+    } else {
+      state = 1;
+      fprintf(stderr, "Incorrect arguments\n");
     }
   }
+
   return state;
 }
 
-int argv_parser(int argc, char* argv[], opt* flags, int *count) {
+void output_file(FILE *file, opt flags) {
+  char ch, ch_pred;
+  int count_s = 1;
+  int count_b = 0;
+  int count_n = 0;
+  int i = 0;
+  if (flags.b == 1) flags.n = 0;
+  while ((ch = fgetc(file)) != EOF) {
+    i++;
+    if (flags.s == 1 && ch == '\n' && count_s < 3) count_s++;
+    if (ch != '\n') count_s = 0;
+    if (count_s == 3) continue;
+    if ((flags.e == 1 && flags.v == 1) && (ch == '\n') && (ch_pred != '\n') &&
+        (count_n != 0 || flags.n == 0) && (count_b != 0 || flags.b == 0))
+      printf("$");
+    if (flags.n == 1 && (count_n == 0 || ch_pred == '\n'))
+      printf("%6d\t", ++count_n);
+    if ((flags.b == 1) &&
+        ((count_b == 0 && ch != '\n') || (ch_pred == '\n' && ch != '\n')))
+      printf("%6d\t", ++count_b);
+    if ((flags.e == 1 && flags.v == 1) && (ch == '\n') &&
+        ((ch_pred == '\n') || (count_n == 1 && flags.n == 1 && i <= 1) ||
+         (count_b == 0 && flags.b == 1 && i <= 1)))
+      printf("$");
+    ch_pred = ch;
+    if (flags.t == 1 && flags.v == 1 && ch == '\t') {
+      printf("^I");
+      continue;
+    }
+    if (flags.v == 1 && ch >= 0 && ch < 32 && ch != '\n' && ch != '\t') {
+      printf("^%c", ch + 64);
+      continue;
+    }
+    if (flags.v == 1 && ch == 127) {
+      printf("^?");
+      continue;
+    }
+    if (flags.e == 1 && flags.v == 1 && ch == 127) printf("^?");
+    printf("%c", ch);
+  }
+}
+
+int argv_parser(int argc, char *argv[], opt *flags, int *count) {
   int tmp_count = 1;
   int state = 0;
 
   while (tmp_count < argc) {
     if (argv[tmp_count][0] == '-' && argv[tmp_count][1] != '-') {
       for (size_t i = 1; i < strlen(argv[tmp_count]); ++i) {
-        // printf("%c\n", argv[tmp_count][i]);
         if (argv[tmp_count][i] == 'b') {
           flags->b = 1;
         } else if (argv[tmp_count][i] == 'e') {
@@ -156,7 +99,7 @@ int argv_parser(int argc, char* argv[], opt* flags, int *count) {
         } else if (argv[tmp_count][i] == 'n') {
           flags->n = 1;
         } else if (argv[tmp_count][i] == 's') {
-          flags->s  = 1;
+          flags->s = 1;
         } else if (argv[tmp_count][i] == 't') {
           flags->t = 1;
           flags->v = 1;
@@ -167,7 +110,6 @@ int argv_parser(int argc, char* argv[], opt* flags, int *count) {
           break;
         }
       }
-      // printf("argv[%d] = %s\n", tmp_count, argv[tmp_count]);
       memset(argv[tmp_count], '\0', strlen(argv[tmp_count]));
     } else if (argv[tmp_count][0] == '-' && argv[tmp_count][1] == '-') {
       if (strcmp(argv[tmp_count], "--number-nonblank") == 0) {
@@ -179,14 +121,15 @@ int argv_parser(int argc, char* argv[], opt* flags, int *count) {
       } else {
         state = 2;
       }
-      // printf("argv[%d] = %s\n", tmp_count, argv[tmp_count]);
-      memset(argv[tmp_count], '\0', strlen(argv[tmp_count]));
+      memset(argv[tmp_count], '\0',
+             strlen(argv[tmp_count]));  // Erase arguments
     } else {
+      // No arguments
       break;
     }
-    // printf("argv[%d] = %s\n", tmp_count, argv[tmp_count]);
     tmp_count++;
   }
   *count = tmp_count;
+
   return state;
 }
