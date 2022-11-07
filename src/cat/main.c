@@ -1,6 +1,6 @@
 #include "main.h"
 
-void zero_flags(opt *flags) {
+void zero_flags(cat_opt *flags) {
   flags->b = 0;
   flags->e = 0;
   flags->v = 0;
@@ -9,14 +9,11 @@ void zero_flags(opt *flags) {
   flags->t = 0;
 }
 
-int argv_parser(int argc, char *argv[], opt *flags, int *count);
-void output_file(FILE *file, opt flags);
-
 int main(int argc, char *argv[]) {
   int state = 0;
 
   if (argc > 1) {
-    opt flags;
+    cat_opt flags;
     zero_flags(&flags);
     int count;
     if (argv_parser(argc, argv, &flags, &count) == 0) {
@@ -40,49 +37,49 @@ int main(int argc, char *argv[]) {
   return state;
 }
 
-void output_file(FILE *file, opt flags) {
-  char ch, ch_pred;
+void output_file(FILE *file, cat_opt flags) {
+  char futur_char, print_char;
   int count_s = 1;
   int count_b = 0;
   int count_n = 0;
   int i = 0;
   if (flags.b == 1) flags.n = 0;
-  while ((ch = fgetc(file)) != EOF) {
+  while ((futur_char = fgetc(file)) != EOF) {
     i++;
-    if (flags.s == 1 && ch == '\n' && count_s < 3) count_s++;
-    if (ch != '\n') count_s = 0;
+    if (flags.s == 1 && futur_char == '\n' && count_s < 3) count_s++;
+    if (futur_char != '\n') count_s = 0;
     if (count_s == 3) continue;
-    if ((flags.e == 1 && flags.v == 1) && (ch == '\n') && (ch_pred != '\n') &&
+    if ((flags.e == 1 && flags.v == 1) && (futur_char == '\n') && (print_char != '\n') &&
         (count_n != 0 || flags.n == 0) && (count_b != 0 || flags.b == 0))
       printf("$");
-    if (flags.n == 1 && (count_n == 0 || ch_pred == '\n'))
+    if (flags.n == 1 && (count_n == 0 || print_char == '\n'))
       printf("%6d\t", ++count_n);
     if ((flags.b == 1) &&
-        ((count_b == 0 && ch != '\n') || (ch_pred == '\n' && ch != '\n')))
+        ((count_b == 0 && futur_char != '\n') || (print_char == '\n' && futur_char != '\n')))
       printf("%6d\t", ++count_b);
-    if ((flags.e == 1 && flags.v == 1) && (ch == '\n') &&
-        ((ch_pred == '\n') || (count_n == 1 && flags.n == 1 && i <= 1) ||
+    if ((flags.e == 1 && flags.v == 1) && (futur_char == '\n') &&
+        ((print_char == '\n') || (count_n == 1 && flags.n == 1 && i <= 1) ||
          (count_b == 0 && flags.b == 1 && i <= 1)))
       printf("$");
-    ch_pred = ch;
-    if (flags.t == 1 && flags.v == 1 && ch == '\t') {
+    print_char = futur_char;
+    if (flags.t == 1 && flags.v == 1 && futur_char == '\t') {
       printf("^I");
       continue;
     }
-    if (flags.v == 1 && ch >= 0 && ch < 32 && ch != '\n' && ch != '\t') {
-      printf("^%c", ch + 64);
+    if (flags.v == 1 && futur_char >= 0 && futur_char < 32 && futur_char != '\n' && futur_char != '\t') {
+      printf("^%c", futur_char + 64);
       continue;
     }
-    if (flags.v == 1 && ch == 127) {
+    if (flags.v == 1 && futur_char == 127) {
       printf("^?");
       continue;
     }
-    if (flags.e == 1 && flags.v == 1 && ch == 127) printf("^?");
-    printf("%c", ch);
+    if (flags.e == 1 && flags.v == 1 && futur_char == 127) printf("^?");
+    printf("%c", futur_char);
   }
 }
 
-int argv_parser(int argc, char *argv[], opt *flags, int *count) {
+int argv_parser(int argc, char *argv[], cat_opt *flags, int *count) {
   int tmp_count = 1;
   int state = 0;
 

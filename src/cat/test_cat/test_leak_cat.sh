@@ -119,6 +119,6 @@ do
     done
 done
 
-echo "\033[31mFAIL: $FAIL\033[0m"
-echo "\033[32mSUCCESS: $SUCCESS\033[0m"
+echo -e "\033[31mFAIL: $FAIL\033[0m"
+echo -e "\033[32mSUCCESS: $SUCCESS\033[0m"
 echo "ALL: $COUNTER"
