@@ -49,13 +49,14 @@ void output_file(FILE *file, cat_opt flags) {
     if (flags.s == 1 && futur_char == '\n' && count_s < 3) count_s++;
     if (futur_char != '\n') count_s = 0;
     if (count_s == 3) continue;
-    if ((flags.e == 1 && flags.v == 1) && (futur_char == '\n') && (print_char != '\n') &&
-        (count_n != 0 || flags.n == 0) && (count_b != 0 || flags.b == 0))
+    if ((flags.e == 1 && flags.v == 1) && (futur_char == '\n') &&
+        (print_char != '\n') && (count_n != 0 || flags.n == 0) &&
+        (count_b != 0 || flags.b == 0))
       printf("$");
     if (flags.n == 1 && (count_n == 0 || print_char == '\n'))
       printf("%6d\t", ++count_n);
-    if ((flags.b == 1) &&
-        ((count_b == 0 && futur_char != '\n') || (print_char == '\n' && futur_char != '\n')))
+    if ((flags.b == 1) && ((count_b == 0 && futur_char != '\n') ||
+                           (print_char == '\n' && futur_char != '\n')))
       printf("%6d\t", ++count_b);
     if ((flags.e == 1 && flags.v == 1) && (futur_char == '\n') &&
         ((print_char == '\n') || (count_n == 1 && flags.n == 1 && i <= 1) ||
@@ -66,7 +67,8 @@ void output_file(FILE *file, cat_opt flags) {
       printf("^I");
       continue;
     }
-    if (flags.v == 1 && futur_char >= 0 && futur_char < 32 && futur_char != '\n' && futur_char != '\t') {
+    if (flags.v == 1 && futur_char >= 0 && futur_char < 32 &&
+        futur_char != '\n' && futur_char != '\t') {
       printf("^%c", futur_char + 64);
       continue;
     }
