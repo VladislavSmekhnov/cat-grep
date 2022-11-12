@@ -17,21 +17,28 @@ int main(int argc, char *argv[]) {
     zero_flags(&flags);
     int count;
     if (argv_parser(argc, argv, &flags, &count) == 0) {
-      while (count < argc && argv[count][0] != '\0') {
-        FILE *fptr = fopen(argv[count], "r");
-        if (fptr != NULL) {
-          output_file(fptr, flags);
-          fclose(fptr);
-        } else {
-          fprintf(stderr, "No shuch file or directory: %s\n", argv[count]);
-          state = 1;
-        }
-        count++;
-      }
+      state = execute_program(argc, argv, flags, &count);
     } else {
       state = 1;
       fprintf(stderr, "Incorrect arguments\n");
     }
+  }
+
+  return state;
+}
+
+int execute_program(int argc, char *argv[], cat_opt flags, int *count) {
+  int state = 0;
+  while (*count < argc && argv[*count][0] != '\0') {
+    FILE *fptr = fopen(argv[*count], "r");
+    if (fptr != NULL) {
+      output_file(fptr, flags);
+      fclose(fptr);
+    } else {
+      fprintf(stderr, "No shuch file or directory: %s\n", argv[*count]);
+      state = 1;
+    }
+    *count++;
   }
 
   return state;
