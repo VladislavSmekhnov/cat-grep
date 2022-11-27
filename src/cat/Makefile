@@ -6,8 +6,8 @@ s21_cat: main.o
 	rm -f *.o
 
 test:
-	./test_cat/test_func_cat.sh &> cat_func_tests.log
-	./test_cat/test_leak_cat.sh &> cat_leak_tests.log
+	./test_cat/test_func_cat.sh > cat_func_tests.log 2>&1
+	./test_cat/test_leak_cat.sh > cat_leak_tests.log 2>&1
 	tail -n 3 cat_func_tests.log cat_leak_tests.log
 	rm *.log
 
