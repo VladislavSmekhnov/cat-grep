@@ -78,9 +78,9 @@ do
 done
 
 # 2 параметра
-for var1 in v c l n h o
+for var1 in c l n h o
 do
-    for var2 in v c l n h o
+    for var2 in c l n h o
     do
         if [ $var1 != $var2 ]
         then

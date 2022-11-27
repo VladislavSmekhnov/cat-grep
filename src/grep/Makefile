@@ -5,6 +5,9 @@ s21_grep: main.o
 	$(CC) main.o -o s21_grep -lpcre
 	rm -f *.o
 
+test:
+	bash grep_tests/test_func_grep.sh &> grep_func_tests.log && tail -n 3 grep_func_tests.log && rm *.log
+
 main.o: main.c
 	$(CC) $(CFLAGS) main.c
 
