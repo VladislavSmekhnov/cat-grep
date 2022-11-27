@@ -1,6 +1,6 @@
 #include "main.h"
 
-void zero_flags(cat_opt *flags) {
+void zero_flags(opt *flags) {
   flags->b = 0;
   flags->e = 0;
   flags->v = 0;
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   int state = 0;
 
   if (argc > 1) {
-    cat_opt flags;
+    opt flags;
     zero_flags(&flags);
     int count;
     if (argv_parser(argc, argv, &flags, &count) == 0) {
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   return state;
 }
 
-int execute_program(int argc, char *argv[], cat_opt flags, int *count) {
+int execute_program(int argc, char *argv[], opt flags, int *count) {
   int state = 0;
   while (*count < argc && argv[*count][0] != '\0') {
     FILE *fptr = fopen(argv[*count], "r");
@@ -38,13 +38,13 @@ int execute_program(int argc, char *argv[], cat_opt flags, int *count) {
       fprintf(stderr, "No shuch file or directory: %s\n", argv[*count]);
       state = 1;
     }
-    *count++;
+    *count += 1;
   }
 
   return state;
 }
 
-void output_file(FILE *file, cat_opt flags) {
+void output_file(FILE *file, opt flags) {
   char futur_char, print_char;
   int count_s = 1;
   int count_b = 0;
@@ -88,7 +88,7 @@ void output_file(FILE *file, cat_opt flags) {
   }
 }
 
-int argv_parser(int argc, char *argv[], cat_opt *flags, int *count) {
+int argv_parser(int argc, char *argv[], opt *flags, int *count) {
   int tmp_count = 1;
   int state = 0;
 
