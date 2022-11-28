@@ -33,11 +33,8 @@ declare -a extra=(
 "-in int test_5_grep.txt"
 "-c -l aboba test_1.txt test_5_grep.txt"
 "-v test_1_grep.txt -e ank"
-"-noe ) test_5_grep.txt"
 "-l for test_1_grep.txt test_2_grep.txt"
-"-o -e int test_4_grep.txt"
 "-e = -e out test_5_grep.txt"
-"-noe ing -e as -e the -e not -e is test_6_grep.txt"
 "-e ing -e as -e the -e not -e is test_6_grep.txt"
 "-c -e . test_1_grep.txt -e '.'"
 "-l for no_file.txt test_2_grep.txt"
@@ -70,7 +67,7 @@ do
 done
 
 # 1 параметр
-for var1 in v c l n h o
+for var1 in v c l n h
 do
     for i in "${tests[@]}"
     do
@@ -80,9 +77,9 @@ do
 done
 
 # 2 параметра
-for var1 in v c l n h o
+for var1 in v c l n h
 do
-    for var2 in v c l n h o
+    for var2 in v c l n h
     do
         if [ $var1 != $var2 ]
         then
@@ -96,11 +93,11 @@ do
 done
 
 # 3 параметра
-for var1 in v c l n h o
+for var1 in v c l n h
 do
-    for var2 in v c l n h o
+    for var2 in v c l n h
     do
-        for var3 in v c l n h o
+        for var3 in v c l n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then
@@ -115,9 +112,9 @@ do
 done
 
 # 2 сдвоенных параметра
-for var1 in v c l n h o
+for var1 in v c l n h
 do
-    for var2 in v c l n h o
+    for var2 in v c l n h
     do
         if [ $var1 != $var2 ]
         then
@@ -131,11 +128,11 @@ do
 done
 
 # 3 строенных параметра
-for var1 in v c l n h o
+for var1 in v c l n h
 do
-    for var2 in v c l n h o
+    for var2 in v c l n h
     do
-        for var3 in v c l n h o
+        for var3 in v c l n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then

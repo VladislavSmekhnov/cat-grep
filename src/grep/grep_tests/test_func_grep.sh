@@ -19,7 +19,6 @@ declare -a extra=(
 "-n for test_1_grep.txt test_2_grep.txt"
 "-n for test_1_grep.txt"
 "-n -e ^\} test_1_grep.txt"
-"-c -e /\ test_1_grep.txt"
 "-ce ^int test_1_grep.txt test_2_grep.txt"
 "-e ^int test_1_grep.txt"
 "-nivh = test_1_grep.txt test_2_grep.txt"
@@ -31,15 +30,11 @@ declare -a extra=(
 "-in int test_5_grep.txt"
 "-c -l aboba test_1_grep.txt test_5_grep.txt"
 "-v test_1_grep.txt -e ank"
-"-noe ) test_5_grep.txt"
 "-l for test_1_grep.txt test_2_grep.txt"
-"-o -e int test_4_grep.txt"
 "-e = -e out test_5_grep.txt"
-"-noe ing -e as -e the -e not -e is test_6_grep.txt"
 "-e ing -e as -e the -e not -e is test_6_grep.txt"
 "-c -e . test_1_grep.txt -e '.'"
 "-l for no_file.txt test_2_grep.txt"
-"-f test_3_grep.txt test_5_grep.txt"
 )
 
 testing()
@@ -52,10 +47,10 @@ testing()
     if [ "$DIFF_RES" == "Files test_s21_grep.log and test_sys_grep.log are identical" ]
     then
       (( SUCCESS++ ))
-      echo -e "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m grep $t"
+      echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m grep $t"
     else
       (( FAIL++ ))
-      echo -e "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[31mfail\033[0m grep $t"
+      echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[31mfail\033[0m grep $t"
     fi
     rm test_s21_grep.log test_sys_grep.log
 }
@@ -68,7 +63,7 @@ do
 done
 
 # 1 параметр
-for var1 in v c l n h o
+for var1 in v c l n h
 do
     for i in "${tests[@]}"
     do
@@ -78,9 +73,9 @@ do
 done
 
 # 2 параметра
-for var1 in l n h
+for var1 in v c l n h
 do
-    for var2 in l n h
+    for var2 in v c l n h
     do
         if [ $var1 != $var2 ]
         then
@@ -94,11 +89,11 @@ do
 done
 
 # 3 параметра
-for var1 in l n h
+for var1 in v c l n h
 do
-    for var2 in l n h
+    for var2 in v c l n h
     do
-        for var3 in l n h
+        for var3 in v c l n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then
@@ -113,9 +108,9 @@ do
 done
 
 # 2 сдвоенных параметра
-for var1 in l n h
+for var1 in v c l n h
 do
-    for var2 in l n h
+    for var2 in v c l n h
     do
         if [ $var1 != $var2 ]
         then
@@ -129,11 +124,11 @@ do
 done
 
 # 3 строенных параметра
-for var1 in l n h
+for var1 in v c l n h
 do
-    for var2 in l n h
+    for var2 in v c l n h
     do
-        for var3 in l n h
+        for var3 in v c l n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then

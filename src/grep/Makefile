@@ -7,7 +7,8 @@ s21_grep: main.o
 
 test:
 	./grep_tests/test_func_grep.sh > grep_func_tests.log 2>&1
-	tail -n 3 grep_func_tests.log
+	./grep_tests/test_leak_grep.sh > grep_leak_tests.log 2>&1
+	tail -n 3 grep_func_tests.log grep_leak_tests.log
 	rm *.log
 
 main.o: main.c

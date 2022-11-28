@@ -104,14 +104,14 @@ int get_memory(opt *flags) {
   int state = 0;
   flags->files = (char **)calloc(2048, sizeof(char *));
   flags->patterns = (char *)calloc(2048, sizeof(char));
-  // if (flags->files == NULL) {
-  //   state = 1;
-  //   free(flags->files);
-  // }
-  // if (flags->patterns == NULL) {
-  //   state = 2;
-  //   free(flags->patterns);
-  // }
+  if (flags->files == NULL) {
+    state = 1;
+    free(flags->files);
+  }
+  if (flags->patterns == NULL) {
+    state = 2;
+    free(flags->patterns);
+  }
   if (flags->files != NULL && flags->patterns != NULL) {
     for (int i = 0; i < 2048 && state == 0; i++) {
       flags->files[i] = (char *)calloc(2048, sizeof(char));
