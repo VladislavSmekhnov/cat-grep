@@ -1,10 +1,10 @@
 #ifndef SRC_GREP_MAIN_H
 #define SRC_GREP_MAIN_H
 
+#include <pcre.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pcre.h>
 
 typedef struct {
   int e;
@@ -32,7 +32,7 @@ void add_pattern_from_file(char *filename, opt *flags);
 void add_pattern(char *patternname, opt *flags);
 void add_file(char *filename, opt *flags);
 void make_pcre_patterns(opt *flags);
-pcre *compile_pattern(opt *flags, char *patternname);
-void do_flag_o(opt *flags, char *patternname);
+pcre *create_pattern(opt *flags, char *patternname);
+void run_flag_o(opt *flags, char *patternname);
 
 #endif  // SRC_GREP_MAIN_H

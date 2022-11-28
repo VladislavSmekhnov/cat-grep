@@ -27,12 +27,11 @@ void sort_bash_first(int argc, char *argv[], opt *flags) {
 }
 
 void sort_bash_second(int argc, char *argv[], opt *flags) {
-  // int i = 0, j = 0;
-  int option = 0, out = 0;
+  int out = 0;
   int letter_e = 0, letter_f = 0;
   int was_a_pattern = 0;
 
-  option = (flags->e || flags->f) ? 1 : 0;
+  int option = (flags->e || flags->f) ? 1 : 0;
   if (option) {
     for (int i = 1; i < argc; i++) {
       if (argv[i][0] == '-') {
@@ -182,22 +181,21 @@ void add_file(char *filename, opt *flags) {
 }
 
 void make_pcre_patterns(opt *flags) {
-  pcre *re = NULL;
   char str[1024] = {0};
   str[0] = '\0';
   int buffer[1024] = {0};
-  int count = 0, string_num = 0;
+  int count = 0, lines_amount = 0;
   int c_flag_amount = 0, out = 1;
-  FILE *fptr = NULL;
-  re = compile_pattern(flags, flags->patterns);
-  for (long unsigned int i = 0; i < flags->count_files; i++) {
-    fptr = fopen(flags->files[i], "r");
+  pcre *pattern = create_pattern(flags, flags->patterns);
+  for (size_t i = 0; i < flags->count_files; i++) {
+    FILE *fptr = fopen(flags->files[i], "r");
     if (fptr) {
       while (!(feof(fptr))) {
-        string_num++;
+        lines_amount++;
         str[0] = '\0';
         fgets(str, sizeof(str), fptr);
-        count = pcre_exec(re, NULL, str, strlen(str), 0, 0, buffer, sizeof(buffer));
+        count = pcre_exec(pattern, NULL, str, strlen(str), 0, 0, buffer,
+                          sizeof(buffer));
         if (count && strlen(str)) {
           if ((count > 0 && !(flags->v)) || (count < 0 && flags->v)) {
             if (flags->count_files > 1 && (!(flags->l) || flags->c) &&
@@ -205,7 +203,7 @@ void make_pcre_patterns(opt *flags) {
               printf("%s:", flags->files[i]);
             }
             if (flags->n && !(flags->l) && !(flags->c)) {
-              printf("%d:", string_num);
+              printf("%d:", lines_amount);
             }
             if (flags->c) {
               out = 0;
@@ -225,7 +223,7 @@ void make_pcre_patterns(opt *flags) {
               }
             }
             if (flags->o && !(flags->c)) {
-              do_flag_o(flags, str);
+              run_flag_o(flags, str);
             }
           }
         }
@@ -240,32 +238,31 @@ void make_pcre_patterns(opt *flags) {
       c_flag_amount = 0;
       fclose(fptr);
     }
-    string_num = 0;
+    lines_amount = 0;
   }
-  if (re) {
-    free(re);
+  if (pattern) {
+    free(pattern);
   }
 }
 
-pcre *compile_pattern(opt *flags, char *pattername) {
+pcre *create_pattern(opt *flags, char *pattername) {
   const char *error = NULL;
   int num_error = 0;
-  pcre *re = NULL;
+  pcre *pattern = NULL;
   if (flags->i) {
-    re = pcre_compile(pattername, PCRE_CASELESS, &error, &num_error, NULL);
+    pattern = pcre_compile(pattername, PCRE_CASELESS, &error, &num_error, NULL);
   } else {
-    re = pcre_compile(pattername, 0, &error, &num_error, NULL);
+    pattern = pcre_compile(pattername, 0, &error, &num_error, NULL);
   }
-  if (!re) {
+  if (!pattern) {
     free_memory(flags);
-    free(re);
+    free(pattern);
     exit(num_error);
   }
-  return re;
+  return pattern;
 }
 
-void do_flag_o(opt *flags, char *str) {
-  pcre *re = NULL;
+void run_flag_o(opt *flags, char *str) {
   int count = 0;
   int buffer[1024] = {0};
   char *start_pos = NULL;
@@ -274,14 +271,14 @@ void do_flag_o(opt *flags, char *str) {
   char single_pattern[1024] = {0};
   single_pattern[0] = '\0';
   start_pos = str;
-  for (long unsigned int c = 0; c <= strlen(flags->patterns); c++) {
+  for (size_t c = 0; c <= strlen(flags->patterns); c++) {
     if (flags->patterns[c] == '|' || flags->patterns[c] == '\0') {
       single_pattern[single_pattern_pos] = '\0';
       single_pattern_pos = 0;
-      re = compile_pattern(flags, single_pattern);
+      pcre *pattern = create_pattern(flags, single_pattern);
       while ((strlen(start_pos) >= strlen(single_pattern)) &&
-             (count = pcre_exec(re, NULL, start_pos, strlen(str), 0, 0, buffer,
-                                sizeof(buffer))) > 0 &&
+             (count = pcre_exec(pattern, NULL, start_pos, strlen(str), 0, 0,
+                                buffer, sizeof(buffer))) > 0 &&
              (strlen(str) >= (present_pos + buffer[1] - 1))) {
         for (int i = buffer[0]; i < buffer[1]; i++) {
           putchar(start_pos[i]);
@@ -290,7 +287,7 @@ void do_flag_o(opt *flags, char *str) {
         start_pos = &start_pos[buffer[1]];
         present_pos += buffer[1];
       }
-      free(re);
+      free(pattern);
     } else {
       single_pattern[single_pattern_pos++] = flags->patterns[c];
     }
