@@ -78,9 +78,9 @@ do
 done
 
 # 2 параметра
-for var1 in c l n h o
+for var1 in l n h
 do
-    for var2 in c l n h o
+    for var2 in l n h
     do
         if [ $var1 != $var2 ]
         then
@@ -94,11 +94,11 @@ do
 done
 
 # 3 параметра
-for var1 in v c l n h o
+for var1 in l n h
 do
-    for var2 in v c l n h o
+    for var2 in l n h
     do
-        for var3 in v c l n h o
+        for var3 in l n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then
@@ -113,9 +113,9 @@ do
 done
 
 # 2 сдвоенных параметра
-for var1 in v c l n h o
+for var1 in l n h
 do
-    for var2 in v c l n h o
+    for var2 in l n h
     do
         if [ $var1 != $var2 ]
         then
@@ -129,11 +129,11 @@ do
 done
 
 # 3 строенных параметра
-for var1 in v c l n h o
+for var1 in l n h
 do
-    for var2 in v c l n h o
+    for var2 in l n h
     do
-        for var3 in v c l n h o
+        for var3 in l n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then

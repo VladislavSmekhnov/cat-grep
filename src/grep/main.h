@@ -25,7 +25,7 @@ typedef struct {
 
 void sort_bash_first(int argc, char *argv[], opt *flags);
 void sort_bash_second(int argc, char *argv[], opt *flags);
-int find_flags(char ch, opt *flags);
+int collect_flags(char ch, opt *flags);
 int get_memory(opt *flags);
 void free_memory(opt *flags);
 void add_pattern_from_file(char *filename, opt *flags);

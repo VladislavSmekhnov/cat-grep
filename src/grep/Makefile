@@ -6,7 +6,9 @@ s21_grep: main.o
 	rm -f *.o
 
 test:
-	bash grep_tests/test_func_grep.sh &> grep_func_tests.log && tail -n 3 grep_func_tests.log && rm *.log
+	./grep_tests/test_func_grep.sh > grep_func_tests.log 2>&1
+	tail -n 3 grep_func_tests.log
+	rm *.log
 
 main.o: main.c
 	$(CC) $(CFLAGS) main.c

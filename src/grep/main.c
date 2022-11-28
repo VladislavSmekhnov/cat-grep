@@ -1,59 +1,60 @@
 #include "main.h"
 
 int main(int argc, char *argv[]) {
-  int error = 0;
+  int state = 0;
   opt flags = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL};
-  error = get_memory(&flags);
-  if (!error) {
+  if (get_memory(&flags) == 0) {
     sort_bash_first(argc, argv, &flags);
     sort_bash_second(argc, argv, &flags);
     make_pcre_patterns(&flags);
     free_memory(&flags);
+  } else {
+    state = 1;
   }
-  return 0;
+  return state;
 }
 
 void sort_bash_first(int argc, char *argv[], opt *flags) {
-  int result = 1;
+  int has_flags = 1;
   for (int i = 1; i < argc; i++) {
     if (argv[i][0] == '-') {
-      for (int j = 1; argv[i][j] != '\0' && result; j++) {
-        result = find_flags(argv[i][j], flags);
+      for (int j = 1; argv[i][j] != '\0' && has_flags; j++) {
+        has_flags = collect_flags(argv[i][j], flags);
       }
-      result = 1;
+      has_flags = 1;
     }
   }
 }
 
 void sort_bash_second(int argc, char *argv[], opt *flags) {
-  int i = 0, j = 0;
+  // int i = 0, j = 0;
   int option = 0, out = 0;
-  int point_e = 0, point_f = 0;
-  int was_there_a_pattern = 0;
+  int letter_e = 0, letter_f = 0;
+  int was_a_pattern = 0;
 
   option = (flags->e || flags->f) ? 1 : 0;
-  if (option == 1) {
-    for (i = 1; i < argc; i++) {
+  if (option) {
+    for (int i = 1; i < argc; i++) {
       if (argv[i][0] == '-') {
-        for (j = 1; argv[i][j] != '\0' && !out; j++) {
+        for (int j = 1; argv[i][j] != '\0' && !out; j++) {
           if (argv[i][j] == 'e' && argv[i][j + 1] != '\0') {
             add_pattern(&argv[i][j + 1], flags);
             out = 1;
           } else if (argv[i][j] == 'f' && argv[i][j + 1] != '\0') {
             add_pattern_from_file(&argv[i][j + 1], flags);
           } else if (argv[i][j] == 'e' && argv[i][j + 1] == '\0') {
-            point_e = 1;
+            letter_e = 1;
           } else if (argv[i][j] == 'f' && argv[i][j + 1] == '\0') {
-            point_f = 1;
+            letter_f = 1;
           }
         }
       } else {
-        if (point_f) {
+        if (letter_f) {
           add_pattern_from_file(argv[i], flags);
-          point_f = 0;
-        } else if (point_e) {
+          letter_f = 0;
+        } else if (letter_e) {
           add_pattern(argv[i], flags);
-          point_e = 0;
+          letter_e = 0;
         } else {
           add_file(argv[i], flags);
         }
@@ -61,10 +62,10 @@ void sort_bash_second(int argc, char *argv[], opt *flags) {
       out = 0;
     }
   } else {
-    for (i = 1; i < argc; i++) {
-      if (argv[i][0] != '-' && !was_there_a_pattern) {
+    for (int i = 1; i < argc; i++) {
+      if (argv[i][0] != '-' && !was_a_pattern) {
         add_pattern(argv[i], flags);
-        was_there_a_pattern = 1;
+        was_a_pattern = 1;
       } else if (argv[i][0] != '-') {
         add_file(argv[i], flags);
       }
@@ -72,7 +73,7 @@ void sort_bash_second(int argc, char *argv[], opt *flags) {
   }
 }
 
-int find_flags(char ch, opt *flags) {
+int collect_flags(char ch, opt *flags) {
   int res = 1;
   if (ch == 'e') {
     flags->e += 1;
@@ -104,14 +105,14 @@ int get_memory(opt *flags) {
   int state = 0;
   flags->files = (char **)calloc(2048, sizeof(char *));
   flags->patterns = (char *)calloc(2048, sizeof(char));
-  if (flags->files == NULL) {
-    state = 1;
-    free(flags->files);
-  }
-  if (flags->patterns == NULL) {
-    state = 2;
-    free(flags->patterns);
-  }
+  // if (flags->files == NULL) {
+  //   state = 1;
+  //   free(flags->files);
+  // }
+  // if (flags->patterns == NULL) {
+  //   state = 2;
+  //   free(flags->patterns);
+  // }
   if (flags->files != NULL && flags->patterns != NULL) {
     for (int i = 0; i < 2048 && state == 0; i++) {
       flags->files[i] = (char *)calloc(2048, sizeof(char));
@@ -121,9 +122,11 @@ int get_memory(opt *flags) {
         }
         free(flags->files);
         free(flags->patterns);
-        state = 3;
+        state = 2;
       }
     }
+  } else {
+    state = 1;
   }
   return state;
 }
@@ -184,18 +187,17 @@ void make_pcre_patterns(opt *flags) {
   str[0] = '\0';
   int buffer[1024] = {0};
   int count = 0, string_num = 0;
-  int c_flag_count = 0, out = 1;
-  FILE *stream = NULL;
+  int c_flag_amount = 0, out = 1;
+  FILE *fptr = NULL;
   re = compile_pattern(flags, flags->patterns);
   for (long unsigned int i = 0; i < flags->count_files; i++) {
-    stream = fopen(flags->files[i], "r");
-    if (stream) {
-      while (!(feof(stream))) {
+    fptr = fopen(flags->files[i], "r");
+    if (fptr) {
+      while (!(feof(fptr))) {
         string_num++;
         str[0] = '\0';
-        fgets(str, sizeof(str), stream);
-        count =
-            pcre_exec(re, NULL, str, strlen(str), 0, 0, buffer, sizeof(buffer));
+        fgets(str, sizeof(str), fptr);
+        count = pcre_exec(re, NULL, str, strlen(str), 0, 0, buffer, sizeof(buffer));
         if (count && strlen(str)) {
           if ((count > 0 && !(flags->v)) || (count < 0 && flags->v)) {
             if (flags->count_files > 1 && (!(flags->l) || flags->c) &&
@@ -207,11 +209,11 @@ void make_pcre_patterns(opt *flags) {
             }
             if (flags->c) {
               out = 0;
-              c_flag_count++;
+              c_flag_amount++;
             }
             if (flags->l) {
               if (flags->c) {
-                printf("%d\n", c_flag_count);
+                printf("%d\n", c_flag_amount);
               }
               printf("%s\n", flags->files[i]);
               break;
@@ -228,15 +230,15 @@ void make_pcre_patterns(opt *flags) {
           }
         }
       }
-      if (count && flags->c && (!(flags->l) || !c_flag_count)) {
-        if (flags->count_files > 1 && !(flags->h) && c_flag_count == 0) {
+      if (count && flags->c && (!(flags->l) || !c_flag_amount)) {
+        if (flags->count_files > 1 && !(flags->h) && c_flag_amount == 0) {
           printf("%s:", flags->files[i]);
         }
-        printf("%d\n", c_flag_count);
+        printf("%d\n", c_flag_amount);
       }
       out = 1;
-      c_flag_count = 0;
-      fclose(stream);
+      c_flag_amount = 0;
+      fclose(fptr);
     }
     string_num = 0;
   }
