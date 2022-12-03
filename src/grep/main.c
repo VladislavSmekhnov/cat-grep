@@ -131,7 +131,7 @@ int get_memory(opt *flags) {
 }
 
 void free_memory(opt *flags) {
-  for (long unsigned int i = 0; i < 2048; i++) {
+  for (size_t i = 0; i < 2048; ++i) {
     free(flags->files[i]);
   }
   free(flags->files);

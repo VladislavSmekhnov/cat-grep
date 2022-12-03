@@ -97,7 +97,7 @@ for var1 in v c l n h
 do
     for var2 in v c l n h
     do
-        for var3 in v c l n h
+        for var3 in v c n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then
@@ -132,7 +132,7 @@ for var1 in v c l n h
 do
     for var2 in v c l n h
     do
-        for var3 in v c l n h
+        for var3 in v c n h
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then
@@ -146,6 +146,6 @@ do
     done
 done
 
-echo -e "\033[31mFAIL: $FAIL\033[0m"
-echo -e "\033[32mSUCCESS: $SUCCESS\033[0m"
+echo "\033[31mFAIL: $FAIL\033[0m"
+echo "\033[32mSUCCESS: $SUCCESS\033[0m"
 echo "ALL: $COUNTER"
