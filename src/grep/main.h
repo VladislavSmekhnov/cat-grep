@@ -1,5 +1,5 @@
-#ifndef SRC_GREP_MAIN_H
-#define SRC_GREP_MAIN_H
+#ifndef SRC_GREP_MAIN_H_
+#define SRC_GREP_MAIN_H_
 
 #include <pcre.h>
 #include <stdio.h>
@@ -17,7 +17,7 @@ typedef struct {
   int s;
   int f;
   int o;
-  size_t count_files;
+  size_t files_number;
   int pattern_length;
   char **files;
   char *patterns;
@@ -35,4 +35,4 @@ void make_pcre_patterns(opt *flags);
 pcre *create_pattern(opt *flags, char *patternname);
 void run_flag_o(opt *flags, char *patternname);
 
-#endif  // SRC_GREP_MAIN_H
+#endif  // SRC_GREP_MAIN_H_

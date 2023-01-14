@@ -1,23 +1,23 @@
 #include "main.h"
 
-void zero_flags(opt *flags) {
-  flags->b = 0;
-  flags->e = 0;
-  flags->v = 0;
-  flags->n = 0;
-  flags->s = 0;
-  flags->t = 0;
-}
-
+/**
+ * @brief Запускает программу в целом.
+ *
+ * @param argc количество аргументов командной строки
+ * @param argv вектор (набор) аргументов командной строки
+ * @return int код ошибки:
+ * 0 - OK;
+ * 1 - файл не найден / некорректные аргументы командной строки при запуске
+ * программы;
+ */
 int main(int argc, char *argv[]) {
   int state = 0;
 
   if (argc > 1) {
-    opt flags;
-    zero_flags(&flags);
-    int count;
-    if (argv_parser(argc, argv, &flags, &count) == 0) {
-      state = execute_program(argc, argv, flags, &count);
+    opt flags = {0};
+    int current_argv_number;
+    if (argv_parser(argc, argv, &flags, &current_argv_number) == 0) {
+      state = execute_program(argc, argv, flags, &current_argv_number);
     } else {
       state = 1;
       fprintf(stderr, "Incorrect arguments\n");
@@ -27,23 +27,43 @@ int main(int argc, char *argv[]) {
   return state;
 }
 
-int execute_program(int argc, char *argv[], opt flags, int *count) {
+/**
+ * @brief Запускает программу считывания аргументов командной строки и вывода
+ * файла.
+ *
+ * @param argc количество аргументов командной строки
+ * @param argv вектор (набор) аргументов командной строки
+ * @param flags флаги для s21_cat (cat)
+ * @param current_argv_number текущий номер аргумента командной строки
+ * @return int код ошибки:
+ * 0 - OK;
+ * 1 - файл для считывания/вывода не найден;
+ */
+int execute_program(int argc, char *argv[], opt flags,
+                    int *current_argv_number) {
   int state = 0;
-  while (*count < argc && argv[*count][0] != '\0') {
-    FILE *fptr = fopen(argv[*count], "r");
+  while (*current_argv_number < argc && argv[*current_argv_number][0] != '\0') {
+    FILE *fptr = fopen(argv[*current_argv_number], "r");
     if (fptr != NULL) {
       output_file(fptr, flags);
       fclose(fptr);
     } else {
-      fprintf(stderr, "No shuch file or directory: %s\n", argv[*count]);
+      fprintf(stderr, "No shuch file or directory: %s\n",
+              argv[*current_argv_number]);
       state = 1;
     }
-    *count += 1;
+    *current_argv_number += 1;
   }
 
   return state;
 }
 
+/**
+ * @brief Выводит файл на консоль (в поток out).
+ *
+ * @param file файл, который выводим
+ * @param flags аргументы cat для вывода файла
+ */
 void output_file(FILE *file, opt flags) {
   char futur_char, print_char;
   int count_s = 1;
@@ -88,54 +108,66 @@ void output_file(FILE *file, opt flags) {
   }
 }
 
-int argv_parser(int argc, char *argv[], opt *flags, int *count) {
-  int tmp_count = 1;
+/**
+ * @brief Парсер аргументов командной строки.
+ *
+ * @param argc количество аргументов командной строки
+ * @param argv вектор аргументов командной строки
+ * @param flags флаги s21_cat (cat)
+ * @param current_argv_number номер текущего аргумента
+ * @return int код ошибки:
+ * 0 - OK;
+ * int > 0 - Ошибка в написании аргумента командной строки;
+ */
+int argv_parser(int argc, char *argv[], opt *flags, int *current_argv_number) {
+  int tmp_argv_number = 1;
   int state = 0;
 
-  while (tmp_count < argc) {
-    if (argv[tmp_count][0] == '-' && argv[tmp_count][1] != '-') {
-      for (size_t i = 1; i < strlen(argv[tmp_count]); ++i) {
-        if (argv[tmp_count][i] == 'b') {
+  while (tmp_argv_number < argc) {
+    if (argv[tmp_argv_number][0] == '-' && argv[tmp_argv_number][1] != '-') {
+      for (size_t i = 1; i < strlen(argv[tmp_argv_number]); ++i) {
+        if (argv[tmp_argv_number][i] == 'b') {
           flags->b = 1;
-        } else if (argv[tmp_count][i] == 'e') {
+        } else if (argv[tmp_argv_number][i] == 'e') {
           flags->e = 1;
           flags->v = 1;
-        } else if (argv[tmp_count][i] == 'E') {
+        } else if (argv[tmp_argv_number][i] == 'E') {
           flags->e = 1;
-        } else if (argv[tmp_count][i] == 'n') {
+        } else if (argv[tmp_argv_number][i] == 'n') {
           flags->n = 1;
-        } else if (argv[tmp_count][i] == 's') {
+        } else if (argv[tmp_argv_number][i] == 's') {
           flags->s = 1;
-        } else if (argv[tmp_count][i] == 't') {
+        } else if (argv[tmp_argv_number][i] == 't') {
           flags->t = 1;
           flags->v = 1;
-        } else if (argv[tmp_count][i] == 'T') {
+        } else if (argv[tmp_argv_number][i] == 'T') {
           flags->t = 1;
         } else if (i == 1) {
           state = 1;
           break;
         }
       }
-      memset(argv[tmp_count], '\0', strlen(argv[tmp_count]));
-    } else if (argv[tmp_count][0] == '-' && argv[tmp_count][1] == '-') {
-      if (strcmp(argv[tmp_count], "--number-nonblank") == 0) {
+      memset(argv[tmp_argv_number], '\0', strlen(argv[tmp_argv_number]));
+    } else if (argv[tmp_argv_number][0] == '-' &&
+               argv[tmp_argv_number][1] == '-') {
+      if (strcmp(argv[tmp_argv_number], "--number-nonblank") == 0) {
         flags->b = 1;
-      } else if (strcmp(argv[tmp_count], "--number") == 0) {
+      } else if (strcmp(argv[tmp_argv_number], "--number") == 0) {
         flags->n = 1;
-      } else if (strcmp(argv[tmp_count], "--squeeze-blank") == 0) {
+      } else if (strcmp(argv[tmp_argv_number], "--squeeze-blank") == 0) {
         flags->s = 1;
       } else {
         state = 2;
       }
-      memset(argv[tmp_count], '\0',
-             strlen(argv[tmp_count]));  // Erase arguments
+      memset(argv[tmp_argv_number], '\0',
+             strlen(argv[tmp_argv_number]));  // Erase arguments
     } else {
       // No arguments
       break;
     }
-    tmp_count++;
+    tmp_argv_number++;
   }
-  *count = tmp_count;
+  *current_argv_number = tmp_argv_number;
 
   return state;
 }

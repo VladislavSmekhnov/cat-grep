@@ -1,5 +1,5 @@
-#ifndef SRC_CAT_MAIN_H
-#define SRC_CAT_MAIN_H
+#ifndef SRC_CAT_MAIN_H_
+#define SRC_CAT_MAIN_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,8 +14,9 @@ typedef struct options {
   int v;
 } opt;
 
-int argv_parser(int argc, char *argv[], opt *flags, int *count);
-int execute_program(int argc, char *argv[], opt flags, int *count);
+int argv_parser(int argc, char *argv[], opt *flags, int *current_argv_number);
+int execute_program(int argc, char *argv[], opt flags,
+                    int *current_argv_number);
 void output_file(FILE *file, opt flags);
 
-#endif  // SRC_CAT_MAIN_H
+#endif  // SRC_CAT_MAIN_H_
